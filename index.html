@@ -1,1 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitel-Microwave designer</title>
 
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- App -->
+  <script defer src="js/main.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <img src="assets/bitel_logo.png" id="logo" alt="Bitel">
+      <h2>Microwave designer</h2>
+    </header>
+
+    <label for="fileInput" class="upload1">Cargar Base datos 1</label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,xlsm">
+    <label for="fileInput" class="upload2">Cargar Base datos 2</label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,xlsm">
+
+    <div class="row">
+      <button onclick="Diagram()">Crear Diagrama</button>
+    </div>
+
+  </div>
+</body>
+</html>
