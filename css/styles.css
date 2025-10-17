@@ -1,145 +1,69 @@
-/* ====== BITEL THEME BASE ====== */
 :root{
-  --bitel-yellow:#FFF200;
-  --bitel-cyan:#00B8EB;
-  --bitel-teal:#008D97;
-  --bitel-deep:#003E4F;
-  --ui-bg:#F5F7F9;
-  --ui-text:#3A3A3A;
-  --radius:12px;
-  --focus:0 0 0 3px rgba(0,184,235,.35);
-  --shadow:0 8px 24px rgba(0,0,0,.08);
+  --blue:#00A3E0; --ink:#111; --line:#9ca3af;
+  --s1:#e11d48; --s2:#d946ef; --s3:#16a34a; --s4:#f59e0b; --s5:#7c3aed; --s6:#14b8a6;
 }
 
+/* Base */
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
-  font-family: Calibri, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background:#003E4F !important; /* contorno azulado externo */
-  margin:0 !important;
-  padding:0 !important;
-  text-align:center;
-  color:var(--ui-text);
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:#f6f7f8;color:#111}
+header{display:flex;gap:12px;align-items:center;padding:14px 16px;background:linear-gradient(90deg,#0a78b3,#065a87);color:#fff}
+header h1{font-size:20px;margin:0}
+main{max-width:1200px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.05);padding:16px;margin-bottom:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{font-weight:600;font-size:14px}
+input[type="file"], input[type="text"], select, button{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px}
+button{border:none;background:#111;color:#fff;font-weight:600;cursor:pointer}
+button.primary{background:var(--blue)}
+button.ghost{background:#fff;color:#111;border:1px solid #d1d5db}
+button.btn-sm{padding:6px 8px;font-size:12px;border-radius:8px}
+button:disabled{opacity:.6;cursor:not-allowed}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
+.pill.ok{background:#dcfce7;color:#166534}
+.pill.bad{background:#fee2e2;color:#991b1b}
+.kpi{display:flex;gap:10px;flex-wrap:wrap}
+canvas{display:none}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:24px;z-index:999}
+.modal.open{display:flex}
+.modal-card{position:relative;background:#fff;border-radius:14px;max-width:98vw;max-height:96vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e5e7eb;background:#fff}
+.modal-title{display:flex;flex-direction:column}
+.modal-title h2{margin:0;font-size:18px}
+.modal-sub{font-size:12px;color:#374151}
+.modal-actions{display:flex;gap:6px;align-items:center}
+.close-x{
+  display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; border-radius:8px;
+  border:1px solid #fecaca; background:#fee2e2; color:#b91c1c;
+  font-weight:900; font-size:16px; line-height:1; cursor:pointer; transition:all .2s;
+}
+.close-x:hover{ background:#fca5a5; border-color:#f87171; }
+
+/* Modal body + imagen (asegura tamaño visible) */
+.modal-body{ flex:1; position:relative; background:#f8fafc; overflow:hidden; min-height:70vh; }
+.zoom-wrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; cursor:grab; }
+.zoom-wrap.grabbing{ cursor:grabbing; }
+.zoom-img{
+  transform-origin:center center; user-select:none; -webkit-user-drag:none;
+  max-width:100%; max-height:100%; object-fit:contain; display:block;
+  visibility:hidden;
 }
 
-/* ====== CONTENEDOR/PÁGINA ====== */
-.page{
-  background:#F5F7F9;               /* fondo claro interior */
-  max-width:1180px;
-  min-height:100vh;
-  margin:18px auto;                  /* deja ver el contorno azul */
-  border-radius:20px;
-  box-shadow:0 18px 60px rgba(0,0,0,.25);
-  padding:0 20px 32px;
+/* === CONTROL DE TAMAÑO DE LA VENTANA EMERGENTE === */
+:root{
+  --modal-w: 95vw;
+  --modal-h: 90vh;
 }
 
-/* ====== HERO (cabecera) ====== */
-.hero{
-  background:#FFF200;                /* amarillo Bitel */
-  border-radius:20px 20px 0 0;
-  padding:28px 16px 22px;
-  text-align:center;
-  border-bottom:1px solid rgba(0,0,0,.06);
-}
-#logo{
-  width:220px;
-  margin:0;                          /* el hero ya agrega espaciado */
-  display:block;
-  margin-inline:auto;
-}
-.hero h2{
-  color:#003E4F;                     /* azul profundo */
-  margin:12px 0 4px;
-  font-weight:800;
-}
+/* Si el padding te achica la ventana, bájalo o quítalo */
+.modal{ padding: 8px; }
 
-/* ====== GRILLA DE ACCIONES ====== */
-.row{
-  display:flex;
-  gap:12px;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  margin:16px auto 0;
+/* Fuerza ancho/alto y elimina los límites previos */
+.modal .modal-card{
+  width: var(--modal-w) !important;
+  height: var(--modal-h) !important;
+  max-width: none !important;
+  max-height: none !important;
 }
-
-/* ====== BOTONES DE SUBIDA (labels) ====== */
-.upload1,
-.upload2{
-  display:inline-block;
-  margin:18px 8px 6px;
-  padding:14px 22px;
-  font-size:16px;
-  font-weight:700;
-  border-radius:12px;
-  border:2px solid transparent;
-  cursor:pointer;
-  user-select:none;
-  box-shadow:0 4px 14px rgba(0,0,0,.12);
-  transition:background .15s ease, transform .04s ease, box-shadow .2s ease, color .15s ease, border-color .15s ease;
-}
-
-/* Variante 1 (cyan) */
-.upload1{
-  background:var(--bitel-cyan);
-  color:#003244;                     /* contraste sobre cyan */
-  border-color:var(--bitel-cyan);
-}
-.upload1:hover{ background:var(--bitel-teal); color:#fff; }
-.upload1:active{ transform:translateY(1px); }
-.upload1:focus{ outline:none; box-shadow:var(--focus); }
-
-/* Variante 2 (teal invertido) */
-.upload2{
-  background:#fff;
-  color:var(--bitel-teal);
-  border-color:var(--bitel-teal);
-}
-.upload2:hover{ background:var(--bitel-teal); color:#fff; }
-.upload2:active{ transform:translateY(1px); }
-.upload2:focus{ outline:none; box-shadow:var(--focus); }
-
-/* Ocultar inputs nativos de archivo */
-input[type="file"]{
-  position:absolute !important;
-  width:1px; height:1px;
-  padding:0; margin:-1px;
-  overflow:hidden; clip:rect(0,0,0,0); border:0;
-}
-
-/* ====== BOTONES GENERALES ====== */
-button{
-  background:#0E4051;                /* azul profundo */
-  color:#E8FBFF;
-  padding:12px 22px;
-  border:none;
-  border-radius:12px !important;
-  font-size:16px;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);
-  transition:background .15s ease, transform .04s ease, box-shadow .2s ease;
-}
-button:hover{ background:var(--bitel-teal); }
-button:active{ transform:translateY(1px); }
-button:disabled{ opacity:.55; cursor:not-allowed; }
-
-/* ====== UTILIDADES ====== */
-/* Tarjetas (si agregas más bloques de contenido) */
-.card{
-  background:#fff;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.06);
-  box-shadow:var(--shadow);
-}
-
-/* Tipografía de títulos secundarios */
-h3,h4{ color:var(--bitel-deep); margin:8px 0; }
-
-/* En pantallas angostas, respira mejor */
-@media (max-width: 640px){
-  .page{ padding:0 14px 28px; }
-  .row{ gap:10px; }
-  .upload1, .upload2, button{ width:100%; max-width:520px; }
-}
-
