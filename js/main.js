@@ -209,8 +209,9 @@ function bearing(lat1, lon1, lat2, lon2){
 
 // Diferencia mínima entre dos rumbos (0..180)
 function angleBetween(b1, b2){
-  let d = Math.abs(b2 - b1) % 360;
+  let d = ((b2 - b1) % 360 + 360) % 360; // normaliza a 0..360
   if (d > 180) d = 360 - d;
+  if (d < EPS_DEG) return 0;             // valores <0.1° se tratan como 0° exactos
   return d;
 }
 
@@ -229,60 +230,76 @@ function angleBetween(b1, b2){
 const MAX_ADJ_ANGLE = 90;   // umbral pedido
 const EPS_DEG = 0.1;        // tolerancia para considerar 0°
 
-function buildAnglesTable(subset){
+function buildAnglesTable(subset, activeStations){
   const norm = s => String(s ?? '').trim();
+  const allowed = new Set((activeStations || []).map(norm).filter(Boolean));
+  const restrictToAllowed = allowed.size > 0;
 
-  // Mapa: site -> Map(remote -> bearing)
+  // Mapa: site -> [{ label, b }]
   const perSite = new Map();
+  const siteLabels = new Map();
+  const remoteCounts = new Map();
 
-  const addEdge = (site, latS, lonS, remote, latR, lonR) => {
-    site = norm(site); remote = norm(remote);
+  const addEdge = (siteRaw, latS, lonS, remoteRaw, latR, lonR) => {
+    const siteKey = norm(siteRaw);
+    if (!siteKey) return;
+    if (restrictToAllowed && !allowed.has(siteKey)) return;
+
+    const remoteKey = norm(remoteRaw);
+    if (!remoteKey) return;
+
+    const siteDisplay = siteRaw ? String(siteRaw).trim() : siteKey;
+    const remoteDisplay = remoteRaw ? String(remoteRaw).trim() : remoteKey;
     const b = bearing(latS, lonS, latR, lonR); // 0..360
-    if(!perSite.has(site)) perSite.set(site, new Map());
-    const m = perSite.get(site);
-    if(!m.has(remote)) m.set(remote, b); // dedup vecino
+
+    if (!perSite.has(siteKey)) perSite.set(siteKey, []);
+    if (!siteLabels.has(siteKey)) siteLabels.set(siteKey, siteDisplay);
+
+    const countKey = `${siteKey}||${remoteKey}`;
+    const nextCount = (remoteCounts.get(countKey) || 0) + 1;
+    remoteCounts.set(countKey, nextCount);
+    const suffix = nextCount > 1 ? ` (#${nextCount})` : '';
+
+    perSite.get(siteKey).push({
+      label: `${siteDisplay}-${remoteDisplay}${suffix}`,
+      b
+    });
   };
 
-  for(const L of subset){
+  for (const L of subset){
     addEdge(L.siteA, L.latA, L.lonA, L.siteB, L.latB, L.lonB);
     addEdge(L.siteB, L.latB, L.lonB, L.siteA, L.latA, L.lonA);
   }
 
   const rows = [];
 
-  perSite.forEach((m, site)=>{
-    const list = Array.from(m.entries()).map(([remote, b]) => ({
-      label: `${site}-${remote}`,
-      b
-    }));
+  perSite.forEach((list, siteKey)=>{
     if(list.length < 2) return;
 
     // Orden angular y pares ADYACENTES en círculo (wrap-around)
-    list.sort((a,b)=> a.b - b.b);
+    list.sort((a,b)=> a.b - b.b || a.label.localeCompare(b.label));
     const N = list.length;
 
     for(let i=0;i<N;i++){
       const a = list[i];
       const c = list[(i+1) % N];               // siguiente en el círculo
-      let ang = angleBetween(a.b, c.b);        // 0..180 (mínimo)
-      if(ang <= EPS_DEG) continue;             // descarta 0°
-      if(ang <= MAX_ADJ_ANGLE){
-        rows.push(`${a.label}, ${c.label}: ${Math.round(ang)}°`);
-      }
+      const ang = angleBetween(a.b, c.b);      // 0..180 (mínimo)
+      if(ang <= 0 || ang >= MAX_ADJ_ANGLE) continue; // descarta 0° y >=90°
+      rows.push({
+        site: siteLabels.get(siteKey) || siteKey,
+        angle: ang,
+        text: `${a.label}, ${c.label}: ${Math.round(ang)}°`
+      });
     }
   });
 
-  // (Opcional) ordena para que sea más legible: por sitio y ángulo
   rows.sort((r1, r2)=>{
-    const [s1] = r1.split('-',1);
-    const [s2] = r2.split('-',1);
-    if(s1 !== s2) return s1.localeCompare(s2);
-    const a1 = parseInt(r1.split(':').pop(),10);
-    const a2 = parseInt(r2.split(':').pop(),10);
-    return a1 - a2;
+    if(r1.site !== r2.site) return r1.site.localeCompare(r2.site);
+    if(r1.angle !== r2.angle) return r1.angle - r2.angle;
+    return r1.text.localeCompare(r2.text);
   });
 
-  return rows;
+  return rows.map(r=>r.text);
 }
 
 
@@ -570,13 +587,13 @@ function drawDesignToCanvas(){
   // marco
   ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1;
   // --- Tabla de ángulos de enlaces aledaños ---
-  const angleRows = buildAnglesTable(subset);
+  const angleRows = buildAnglesTable(subset, act.map(s=>s.name).filter(Boolean));
 if(angleRows.length){
   ctx.save();
   const left = 120, top = H - 110, lineH = 16;
   ctx.fillStyle = '#000';
   ctx.font = '600 13px system-ui';
-  ctx.fillText('Tabla ángulos (≤90°):', left, top);
+  cctx.fillText('Tabla ángulos (<90°):', left, top);
 
   ctx.font = '12px system-ui';
   const maxPerCol = Math.ceil(angleRows.length / 2);
