@@ -28,8 +28,7 @@ const FM_P_FACTORS = {
 };
 
 const els = {
-  file1: document.getElementById('file1'),
-  file2: document.getElementById('file2'),
+  dbUpdated: document.getElementById('dbUpdated'),
   freqFilter: document.getElementById('freqFilter'),
   stationsRow: document.getElementById('stationsRow'),
   addStation: document.getElementById('addStation'),
@@ -288,11 +287,143 @@ function buildAnglesTable(subset){
 
 // Umbral para decidir si un rótulo está "lejos" y requiere flecha (FLECHA DE SENSIBILIDAD, FLECHA DE DISTANCIA)
 const LABEL_LEADER_THRESHOLD = 46; // px (ajústalo si quieres)
+/* ===== Carga automática desde databases ===== */
 
+const DATABASES = [
+  {
+    url: 'databases/metro-mw-design.xlsx',
+    dataset: 0
+  },
+  {
+    url: 'databases/customer-mw-design.xlsx',
+    dataset: 1
+  }
+];
 
-/* ===== Carga uno por uno ===== */
-els.file1.addEventListener('change', ()=> loadFile(els.file1.files[0], 0));
-els.file2.addEventListener('change', ()=> loadFile(els.file2.files[0], 1));
+window.addEventListener('DOMContentLoaded', () => {
+  loadAllDatabases();
+});
+
+async function loadAllDatabases(){
+
+  try{
+
+    setStatus('Cargando bases de datos...', 'ok');
+
+    for(const db of DATABASES){
+      await loadFileFromUrl(db.url, db.dataset);
+    }
+
+    refreshSitesList();
+
+    document.getElementById('q1').disabled = false;
+    document.getElementById('q2').disabled = false;
+
+    els.previewBtn.disabled = false;
+    els.freqFilter.disabled = false;
+
+    updateAddStationState();
+
+    await updateDatabaseDate();
+
+    els.kpiRows.textContent = `Archivos: 2`;
+    els.kpiRows.className='pill';
+    els.kpiRows.style.display='inline-block';
+
+    els.kpiLinks.textContent = `Enlaces válidos: ${links.length}`;
+    els.kpiLinks.className='pill';
+    els.kpiLinks.style.display='inline-block';
+
+    setStatus(`Bases cargadas correctamente (${links.length} enlaces)`, 'ok');
+
+  }catch(err){
+
+    console.error(err);
+    setStatus(`Error cargando bases: ${err.message}`, 'bad');
+
+  }
+}
+
+async function loadFileFromUrl(url, datasetIdx){
+
+  const response = await fetch(url + '?v=' + Date.now());
+
+  if(!response.ok){
+    throw new Error(`No se pudo cargar ${url}`);
+  }
+
+  const ab = await response.arrayBuffer();
+
+  const wb = XLSX.read(ab, {type:'array'});
+
+  const wsname = wb.SheetNames[0];
+
+  const ws = wb.Sheets[wsname];
+
+  const rows = XLSX.utils.sheet_to_json(ws, {defval: ''});
+
+  const parsed = normalizeLinks(rows, datasetIdx);
+
+  links = links
+    .filter(L => L.dataset !== datasetIdx)
+    .concat(parsed);
+}
+
+function refreshSitesList(){
+
+  sitesSet = new Set();
+
+  links.forEach(L => {
+
+    sitesSet.add(L.siteA);
+    sitesSet.add(L.siteB);
+
+  });
+
+  const opts = Array.from(sitesSet)
+    .sort()
+    .map(s=>`<option value="${escapeHtml(s)}"></option>`)
+    .join('');
+
+  els.sitesList.innerHTML = opts;
+}
+
+async function updateDatabaseDate(){
+
+  if(!els.dbUpdated) return;
+
+  try{
+
+    const res = await fetch(
+      'databases/metro-mw-design.xlsx',
+      {
+        method:'HEAD'
+      }
+    );
+
+    const lastModified = res.headers.get('Last-Modified');
+
+    if(lastModified){
+
+      const d = new Date(lastModified);
+
+      els.dbUpdated.textContent =
+        `Archivos actualizados a la fecha: ${d.toLocaleString()}`;
+
+    }else{
+
+      els.dbUpdated.textContent =
+        'Archivos actualizados a la fecha: no disponible';
+
+    }
+
+  }catch(err){
+
+    els.dbUpdated.textContent =
+      'Archivos actualizados a la fecha: no disponible';
+
+  }
+}
 
 async function loadFile(file, datasetIdx){
   if(!file){ return; }
