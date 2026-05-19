@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>K-Microwave Studio – Diseñador MW V1</title>
+  <title>Microwave Studio</title>
 
   <script src="./libs/xlsx.full.min.js"></script>
   <script src="./libs/jspdf.umd.min.js"></script>
@@ -23,8 +23,7 @@
 
     <header class="hero">
       <img src="img/bitel_logo.png" class="logo" alt="bitel">
-      <h1>K-Microwave Studio</h1>
-      <p>Diseñador de enlaces microondas V1</p>
+      <h1>Microwave Studio</h1>
     </header>
 
     <div class="bar">
@@ -46,16 +45,16 @@
     </div>
 
     <div class="card">
-      <h3>Parámetros del enlace</h3>
+      <h3>Link parameters</h3>
 
       <div id="stationsRow" class="row stations-grid">
         <div>
-          <label>Estación 1</label>
+          <label>Station 1</label>
           <input id="q1" type="text" list="sites_list" placeholder="Ej: LIMA_CERRO" disabled />
         </div>
 
         <div>
-          <label>Estación 2</label>
+          <label>Station 2</label>
           <input id="q2" type="text" list="sites_list" placeholder="Ej: CALLAO_NORTE" disabled />
         </div>
       </div>
@@ -63,15 +62,15 @@
       <datalist id="sites_list"></datalist>
 
       <div class="row actions-row">
-        <button id="addStation" class="btn secondary" disabled type="button">Agregar estación</button>
+        <button id="addStation" class="btn secondary" disabled type="button">Add station</button>
 
         <label class="pill">
           <input id="leadersToggle" type="checkbox" />
-          Flechas guía
+          Reference Arrows
         </label>
 
-        <button id="previewBtn" class="btn accent" disabled type="button">Generar topología física</button>
-        <button id="fadeMarginBtn" class="btn success" disabled type="button">Analizar Fade Margin</button>
+        <button id="previewBtn" class="btn accent" disabled type="button">Draw physical topology</button>
+        <button id="fadeMarginBtn" class="btn success" disabled type="button">Analize Fade Margin</button>
 
         <span id="status" class="pill bad" style="display:none"></span>
       </div>
@@ -83,7 +82,7 @@
     </div>
 
     <div id="fadeTableWrap" class="card" style="display:none;">
-      <h3>Cálculo de desvanecimiento y máxima interferencia aceptada</h3>
+      <h3>Calculate FM and maximum interference</h3>
       <div id="fadeTable"></div>
 
       <div class="row" style="margin-top:10px;">
