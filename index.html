@@ -19,15 +19,22 @@
   <div class="card">
     <p><strong>Cargue sus bases de datos (Archivos de diseño)</strong></p>
     <div class="row">
-      <div>
-        <label>Base de datos 1</label>
-        <input id="file1" type="file" accept=".xlsx,.xls" />  
-      </div>
-      <div>
-        <label>Base de datos 2</label>
-        <input id="file2" type="file" accept=".xlsx,.xls" />
-      </div>
+    <div>
+      <label>Base de datos 1</label>
+      <div class="pill">databases/metro-mw-design.xlsx</div>
     </div>
+  
+    <div>
+      <label>Base de datos 2</label>
+      <div class="pill">databases/customer-mw-design.xlsx</div>
+    </div>
+  </div>
+  
+  <div style="margin-top:8px">
+    <span id="dbUpdated" class="pill">
+      Archivos actualizados a la fecha: cargando...
+    </span>
+  </div>
     <div class="row" style="margin-top:8px">
       <div>
         <label>Seleccione la Banda de Frecuencia</label>
