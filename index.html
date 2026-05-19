@@ -5,71 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>K-Microwave Studio – Diseñador MW V1</title>
 
-  <!-- Librerías externas -->
   <script src="./libs/xlsx.full.min.js"></script>
   <script src="./libs/jspdf.umd.min.js"></script>
 
-  <!-- Tu CSS -->
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 
 <body>
-<header><h1>Diseño enlaces microondas</h1></header>
-<main>  
-  <div style="margin-top:8px">
-    <span id="dbUpdated" class="pill">
-      Archivos actualizados a la fecha: cargando...
-    </span>
-  </div>
-    <div class="row" style="margin-top:8px">
+  <div class="page">
+
+    <div id="loadingOverlay" aria-hidden="true">
       <div>
-        <label>Seleccione la Banda de Frecuencia</label>
+        <div class="loader"></div>
+        <div class="loader-text">Procesando…</div>
+      </div>
+    </div>
+
+    <header class="hero">
+      <img src="img/bitel_logo.png" class="logo" alt="bitel">
+      <h1>K-Microwave Studio</h1>
+      <p>Diseñador de enlaces microondas V1</p>
+    </header>
+
+    <div class="bar">
+      <span id="dbUpdated" class="pill">
+        Archivos actualizados a la fecha: cargando...
+      </span>
+
+      <label class="pill">Banda:
         <select id="freqFilter" disabled>
           <option value="todos">Todos</option>
-          <option value="6L">6L</option><option value="6U">6U</option>
-          <option value="7L">7L</option><option value="7U">7U</option>
-          <option value="8">8</option><option value="13">13</option>
+          <option value="6L">6L</option>
+          <option value="6U">6U</option>
+          <option value="7L">7L</option>
+          <option value="7U">7U</option>
+          <option value="8">8</option>
+          <option value="13">13</option>
         </select>
+      </label>
+    </div>
+
+    <div class="card">
+      <h3>Parámetros del enlace</h3>
+
+      <div id="stationsRow" class="row stations-grid">
+        <div>
+          <label>Estación 1</label>
+          <input id="q1" type="text" list="sites_list" placeholder="Ej: LIMA_CERRO" disabled />
+        </div>
+
+        <div>
+          <label>Estación 2</label>
+          <input id="q2" type="text" list="sites_list" placeholder="Ej: CALLAO_NORTE" disabled />
+        </div>
+      </div>
+
+      <datalist id="sites_list"></datalist>
+
+      <div class="row actions-row">
+        <button id="addStation" class="btn secondary" disabled type="button">Agregar estación</button>
+
+        <label class="pill">
+          <input id="leadersToggle" type="checkbox" />
+          Flechas guía
+        </label>
+
+        <button id="previewBtn" class="btn accent" disabled type="button">Generar topología física</button>
+        <button id="fadeMarginBtn" class="btn success" disabled type="button">Analizar Fade Margin</button>
+
+        <span id="status" class="pill bad" style="display:none"></span>
+      </div>
+
+      <div class="kpi">
+        <span id="kpiRows" class="pill" style="display:none"></span>
+        <span id="kpiLinks" class="pill" style="display:none"></span>
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div id="stationsRow" class="row">
-      <div><label>Estación 1</label><input id="q1" type="text" list="sites_list" placeholder="Ej: LIMA_CERRO" disabled /></div>
-      <div><label>Estación 2</label><input id="q2" type="text" list="sites_list" placeholder="Ej: CALLAO_NORTE" disabled /></div>
-    </div>
-    <datalist id="sites_list"></datalist>
-
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <button id="addStation" class="ghost" disabled>Agregar estación</button>
-      <label style="display:flex;gap:6px;align-items:center;font-size:13px">
-        <input id="leadersToggle" type="checkbox" />
-        Flechas guía
-      </label>
-      <button id="previewBtn" class="primary" disabled>Generar topología física</button>
-      <button id="fadeMarginBtn" class="fade" disabled>Analizar Fade Margin</button>
-      <span id="status" class="pill bad" style="display:none"></span>
-    </div>
-
-    <div class="kpi">
-      <span id="kpiRows" class="pill" style="display:none"></span>
-      <span id="kpiLinks" class="pill" style="display:none"></span>
-    </div>
-    
-    <!-- Resultados de Fade Margin -->
-    <div id="fadeTableWrap" class="card" style="display:none; margin-top:12px;">
-      <h3 style="margin:6px 0 12px">Cálculo de desvanecimiento y máxima interferencia aceptada</h3>
+    <div id="fadeTableWrap" class="card" style="display:none;">
+      <h3>Cálculo de desvanecimiento y máxima interferencia aceptada</h3>
       <div id="fadeTable"></div>
-      <div style="display:flex; gap:8px; margin-top:10px;">
+
+      <div class="row" style="margin-top:10px;">
         <span id="fadeCount" class="pill" style="display:none"></span>
       </div>
-  </div>
+    </div>
+
+    <canvas id="cnv" width="1800" height="1000"></canvas>
   </div>
 
-  <canvas id="cnv" width="1800" height="1000"></canvas>
-
-  <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-card">
       <div class="modal-head">
@@ -77,16 +101,18 @@
           <h2>Diseño enlaces microondas</h2>
           <div id="modalSub" class="modal-sub"></div>
         </div>
+
         <div class="modal-actions">
-          <button id="zoomOut" class="btn-sm ghost">−</button>
-          <button id="zoomIn" class="btn-sm ghost">+</button>
-          <button id="zoomReset" class="btn-sm ghost">Reset</button>
-          <button id="copyImg" class="btn-sm ghost">Copiar</button>
-          <button id="dlImg" class="btn-sm ghost">PNG</button>
-          <button id="dlPdf" class="btn-sm primary">PDF</button>
-          <button id="closeModalX" class="close-x">×</button>
+          <button id="zoomOut" class="btn-sm ghost" type="button">−</button>
+          <button id="zoomIn" class="btn-sm ghost" type="button">+</button>
+          <button id="zoomReset" class="btn-sm ghost" type="button">Reset</button>
+          <button id="copyImg" class="btn-sm ghost" type="button">Copiar</button>
+          <button id="dlImg" class="btn-sm ghost" type="button">PNG</button>
+          <button id="dlPdf" class="btn-sm primary" type="button">PDF</button>
+          <button id="closeModalX" class="close-x" type="button">×</button>
         </div>
       </div>
+
       <div class="modal-body">
         <div id="zoomWrap" class="zoom-wrap">
           <img id="previewImg" class="zoom-img" alt="Vista previa enlaces" />
@@ -94,9 +120,7 @@
       </div>
     </div>
   </div>
-</main>
 
-<!-- Tu JS -->
-<script src="js/main.js" defer></script>
+  <script src="js/main.js" defer></script>
 </body>
 </html>
