@@ -334,7 +334,7 @@ async function loadAllDatabases(){
     els.kpiLinks.className='pill';
     els.kpiLinks.style.display='inline-block';
 
-    setStatus(`Bases cargadas correctamente (${links.length} enlaces)`, 'ok');
+    setStatus(`Databases updated sucessfully (${links.length} enlaces)`, 'ok');
 
   }catch(err){
 
@@ -579,7 +579,7 @@ els.addStation.addEventListener('click', ()=>{
   if(count >= MAX_STATIONS) return;
   const idx = count + 1;
   const wrap = document.createElement('div');
-  wrap.innerHTML = `<label>Estación ${idx}</label><input type="text" list="sites_list" placeholder="Ej: EST_${idx}" />`;
+  wrap.innerHTML = `<label>Station ${idx}</label><input type="text" list="sites_list" placeholder="Ej: EST_${idx}" />`;
   els.stationsRow.appendChild(wrap);
   updateAddStationState();
 });
